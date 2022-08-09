@@ -75,10 +75,10 @@ namespace BusSchedule
                 }
             }
         }
-        public static void FindMinTime() {
-            StopTime currentStop = new StopTime(0, minTimes[0].currentMin);
+        public static void FindMinTime(Int32 start, Int32 finish, Int32 startTime) {
+            StopTime currentStop = new StopTime(start-1, minTimes[start-1].currentMin);
 
-            while (!minTimes[K - 1].isMin)
+            while (!minTimes[finish-1].isMin)
             {
                 foreach (var bus in buses)
                 {
@@ -129,9 +129,9 @@ namespace BusSchedule
                 }
             }
         }
-        public static void FindMinCost() {
-            StopCost currentStop = new StopCost(0, 0, 0);
-            while (!minCosts[K - 1].isMin)
+        public static void FindMinCost(Int32 start, Int32 finish, Int32 startTime) {
+            StopCost currentStop = new StopCost(start-1, 0, startTime);
+            while (!minCosts[finish-1].isMin)
             {
                 foreach (var bus in buses)
                 {
@@ -185,30 +185,34 @@ namespace BusSchedule
         }
         static void Main(string[] args)
         {
+            Int32 start = Int32.Parse(Console.ReadLine());
+            Int32 finish = Int32.Parse(Console.ReadLine());
+            var temp = Console.ReadLine().Split(':');
+            Int32 startTime = Int32.Parse(temp[0])*60 + Int32.Parse(temp[1]);
             String path = Path.Combine(Directory.GetCurrentDirectory(), "task.txt");
             ReadData(path);
 
-            minTimes[0].isMin = true;
-            minTimes[0].currentMin = 0;
-            FindMinTime();
+            minTimes[start-1].isMin = true;
+            minTimes[start - 1].currentMin = startTime;
+            FindMinTime(start, finish, startTime);
 
-            minCosts[0].isMin = true;
-            minCosts[0].currentMin = 0;
-            minCosts[0].time = 0;
-            FindMinCost();
+            minCosts[start - 1].isMin = true;
+            minCosts[start - 1].currentMin = 0;
+            minCosts[start - 1].time = startTime;
+            FindMinCost(start, finish, startTime);
 
-            foreach (var a in minTimes[K - 1].route) {
+            foreach (var a in minTimes[finish - 1].route) {
                 Console.WriteLine(a.ToString());
             }
             Console.WriteLine("Время прибытия - {0}:{1}", 
-                minTimes[K - 1].currentMin / 60, minTimes[K - 1].currentMin % 60 == 0 ? "00" : (minTimes[K - 1].currentMin % 60).ToString());
+                minTimes[finish - 1].currentMin / 60, minTimes[finish - 1].currentMin % 60 == 0 ? "00" : (minTimes[finish - 1].currentMin % 60).ToString());
             
-            foreach (var a in minCosts[K - 1].route)
+            foreach (var a in minCosts[finish - 1].route)
             {
                 Console.WriteLine(a.ToString());
             }
             Console.WriteLine("Cуммарная стоимость поездки - {0}",
-                minCosts[K-1].currentMin);
+                minCosts[finish - 1].currentMin);
 
             Console.ReadLine();
         }
