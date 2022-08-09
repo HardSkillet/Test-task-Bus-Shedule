@@ -44,9 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bus.cs" />
-    <Compile Include="Time.cs" />
+    <Compile Include="Auxiliary.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RouteMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

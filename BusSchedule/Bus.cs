@@ -1,40 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace BusSchedule
 {
-
-    public class RouteMap {
-        public Int32 numberOfStop;
-        public Int32 numberOfBus;
-        public Int32 time;
-        public RouteMap(Int32 stop, Int32 bus, Int32 time) {
-            numberOfStop = stop;
-            numberOfBus = bus;
-            this.time = time;
-        }
-        public override String ToString()
-        {
-            return String.Format("С остановки №{0} на автобусе №{1} в {2}:{3}", 
-                numberOfStop, numberOfBus, time / 60, time % 60 == 0 ? "00" : (time % 60).ToString());
-        }
-    }
-    public class StopTime
-    {
-        public Int32 Stop { get; set; }
-        public Int32 When { get; set; }
-        public StopTime(Int32 s) : this(s, 0)
-        { }
-        public StopTime(Int32 s, Int32 t)
-        {
-            Stop = s;
-            When = t;
-        }
-    }
     public class Bus
     {
         private Int32 _number;
@@ -42,7 +9,8 @@ namespace BusSchedule
         private Int32 _cost;
 
         public Int32 stopCycle = 0;
-        public Int32 length;
+        private Int32 length;
+        public Int32 Length { get { return length; } }
         public Int32 Number { get { return _number; } }
         public Int32 DepartureTime { 
             get { return _departureTime; }
@@ -80,7 +48,7 @@ namespace BusSchedule
         
         public Int32 Contains(Int32 stop) {
             var left = 0;
-            var right = length;
+            var right = length-1;
             if (left == right)
                 return left;
             while (true)
