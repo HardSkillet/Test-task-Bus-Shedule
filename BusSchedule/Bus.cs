@@ -7,10 +7,28 @@ using System.Threading.Tasks;
 
 namespace BusSchedule
 {
+
+    public class RouteMap {
+        public Int32 numberOfStop;
+        public Int32 numberOfBus;
+        public Int32 time;
+        public RouteMap(Int32 stop, Int32 bus, Int32 time) {
+            numberOfStop = stop;
+            numberOfBus = bus;
+            this.time = time;
+        }
+        public override String ToString()
+        {
+            return String.Format("С остановки №{0} на автобусе №{1} в {2}:{3}", 
+                numberOfStop, numberOfBus, time / 60, time % 60 == 0 ? "00" : (time % 60).ToString());
+        }
+    }
     public class StopTime
     {
         public Int32 Stop { get; set; }
         public Int32 When { get; set; }
+        public StopTime(Int32 s) : this(s, 0)
+        { }
         public StopTime(Int32 s, Int32 t)
         {
             Stop = s;
@@ -48,8 +66,9 @@ namespace BusSchedule
                 route[position] = value;
             }
         }
-        public Bus(Int32 number) {
+        public Bus(Int32 number, Int32 hours, Int32 minutes) {
             _number = number;
+            _departureTime = hours * 60 + minutes;
         }
         public void RouteInitialization(Int32 n) {
             length = n;
