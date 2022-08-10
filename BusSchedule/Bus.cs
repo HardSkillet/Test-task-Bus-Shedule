@@ -7,9 +7,8 @@ namespace BusSchedule
         private Int32 _number;
         private Int32 _departureTime;
         private Int32 _cost;
-
-        public Int32 stopCycle = 0;
         private Int32 length;
+        public Int32 stopCycle = 0;
         public Int32 Length { get { return length; } }
         public Int32 Number { get { return _number; } }
         public Int32 DepartureTime { 
@@ -21,7 +20,7 @@ namespace BusSchedule
             get { return _cost; }
             set { _cost = value; }
         }
-        public StopTime[] route;
+        private StopTime[] route;
         public StopTime this[Int32 position] {
             get {
                 if (position >= length)
@@ -45,7 +44,6 @@ namespace BusSchedule
         public void DepartureTimeInitialization(Int32 hours, Int32 minutes) {
             _departureTime = hours * 60 + minutes;
         }
-        
         public Int32 Contains(Int32 stop) {
             var left = 0;
             var right = length-1;

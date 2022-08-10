@@ -13,6 +13,9 @@ namespace BusSchedule
         static MinTime[] minTimes;
         static MinCost[] minCosts;
         static Bus[] buses;
+        static Int32 start;
+        static Int32 finish;
+        static Int32 startTime;
 
         public class MinTime {
             public Boolean isMin = false;
@@ -73,39 +76,53 @@ namespace BusSchedule
                         buses[i].stopCycle += Int32.Parse(temp[j + 1 + numberOfStops]);
                     }
                 }
+                var t = fs.ReadLine();
+                if (t is null)
+                {
+                    start = 1; finish = K; startTime = 0;
+                }
+                else {
+                    start = Int32.Parse(t);
+                    t = fs.ReadLine();
+                    finish = Int32.Parse(t);
+                    temp = fs.ReadLine().Split(':');
+                    startTime = 60 * Int32.Parse(temp[0]) + Int32.Parse(temp[1]);
+                }
             }
         }
-        public static void FindMinTime(Int32 start, Int32 finish, Int32 startTime) {
-            StopTime currentStop = new StopTime(start-1, minTimes[start-1].currentMin);
+        public static void FindMinTime(Int32 start, Int32 finish, Int32 startTime)
+        {
+            StopTime currentStartStop = new StopTime(start - 1, minTimes[start - 1].currentMin);
 
-            while (!minTimes[finish-1].isMin)
+            while (!minTimes[finish - 1].isMin)
             {
                 foreach (var bus in buses)
                 {
-                    var position = bus.Contains(currentStop.Stop);
+                    var position = bus.Contains(currentStartStop.Stop);
                     if (position > -1)
                     {
                         var cycleMultiplier = 0;
-                        if (bus[position].When >= currentStop.When)
+                        if (bus[position].When >= currentStartStop.When)
                         {
                             cycleMultiplier = 0;
                         }
                         else
                         {
-                            cycleMultiplier = (currentStop.When - bus[position].When + bus.stopCycle - 1) / bus.stopCycle;
-                            cycleMultiplier *= bus.stopCycle;
+                            cycleMultiplier = (currentStartStop.When - bus[position].When + bus.stopCycle - 1) / bus.stopCycle;
                         }
-                        for (Int32 i = 0; i < bus.Length; i++)
+                        for (Int32 i = 1; i < bus.Length; i++)
                         {
-                            var temp = bus[(position + i) % bus.Length];
+                            var ind = (position + i);
+                            var temp = bus[ind % bus.Length];
                             if (minTimes[temp.Stop].isMin) { continue; }
                             else
                             {
-                                if (temp.When + cycleMultiplier < minTimes[temp.Stop].currentMin)
+                                if (temp.When + (cycleMultiplier + ind / bus.Length) * bus.stopCycle < minTimes[temp.Stop].currentMin)
                                 {
-                                    minTimes[temp.Stop].currentMin = temp.When + cycleMultiplier;
-                                    minTimes[temp.Stop].route = new List<RouteMap>(minTimes[currentStop.Stop].route);
-                                    minTimes[temp.Stop].route.Add(new RouteMap(currentStop.Stop + 1, bus.Number + 1, bus[position].When + cycleMultiplier));
+                                    minTimes[temp.Stop].currentMin = temp.When + (cycleMultiplier + ind / bus.Length) * bus.stopCycle;
+                                    minTimes[temp.Stop].route = new List<RouteMap>(minTimes[currentStartStop.Stop].route);
+                                    minTimes[temp.Stop].route.Add(new RouteMap(currentStartStop.Stop + 1,
+                                        bus.Number + 1, bus[position].When + cycleMultiplier * bus.stopCycle));
                                 }
                             }
                         }
@@ -124,42 +141,44 @@ namespace BusSchedule
                 }
                 if (index != -1)
                 {
-                    currentStop = new StopTime(index, time);
+                    currentStartStop = new StopTime(index, time);
                     minTimes[index].isMin = true;
                 }
             }
         }
         public static void FindMinCost(Int32 start, Int32 finish, Int32 startTime) {
-            StopCost currentStop = new StopCost(start-1, 0, startTime);
+            StopCost currentStartStop = new StopCost(start-1, 0, startTime);
             while (!minCosts[finish-1].isMin)
             {
                 foreach (var bus in buses)
                 {
-                    var position = bus.Contains(currentStop.Stop);
+                    var position = bus.Contains(currentStartStop.Stop);
                     if (position > -1)
                     {
                         var cycleMultiplier = 0;
-                        if (bus[position].When >= currentStop.Time)
+                        if (bus[position].When >= currentStartStop.Time)
                         {
                             cycleMultiplier = 0;
                         }
                         else
                         {
-                            cycleMultiplier = ((currentStop.Time - bus[position].When + bus.stopCycle - 1) / bus.stopCycle) * bus.stopCycle;
+                            cycleMultiplier = (currentStartStop.Time - bus[position].When + bus.stopCycle - 1) / bus.stopCycle;
                         }
-                        for (Int32 i = 0; i < bus.Length; i++)
+                        for (Int32 i = 1; i < bus.Length; i++)
                         {
+                            var ind = (position + i);
                             var temp = bus[(position + i) % bus.Length];
                             if (minCosts[temp.Stop].isMin) { continue; }
                             else
                             {
-                                if (minCosts[currentStop.Stop].currentMin + bus.Cost < minCosts[temp.Stop].currentMin &&
-                                    temp.When + cycleMultiplier < upperTime)
+                                if (minCosts[currentStartStop.Stop].currentMin + bus.Cost < minCosts[temp.Stop].currentMin &&
+                                    (cycleMultiplier + ind / bus.Length) * bus.stopCycle < upperTime)
                                 {
-                                    minCosts[temp.Stop].time = temp.When + cycleMultiplier;
-                                    minCosts[temp.Stop].currentMin = minCosts[currentStop.Stop].currentMin + bus.Cost;
-                                    minCosts[temp.Stop].route = new List<RouteMap>(minCosts[currentStop.Stop].route);
-                                    minCosts[temp.Stop].route.Add(new RouteMap(currentStop.Stop + 1, bus.Number + 1, bus[position].When + cycleMultiplier));
+                                    minCosts[temp.Stop].time = temp.When + (cycleMultiplier + ind / bus.Length) * bus.stopCycle;
+                                    minCosts[temp.Stop].currentMin = minCosts[currentStartStop.Stop].currentMin + bus.Cost;
+                                    minCosts[temp.Stop].route = new List<RouteMap>(minCosts[currentStartStop.Stop].route);
+                                    minCosts[temp.Stop].route.Add(new RouteMap(currentStartStop.Stop + 1,
+                                        bus.Number + 1, bus[position].When + cycleMultiplier * bus.stopCycle));
                                 }
                             }
                         }
@@ -178,17 +197,13 @@ namespace BusSchedule
                 }
                 if (index != -1)
                 {
-                    currentStop = new StopCost(index, cost, minCosts[index].time);
+                    currentStartStop = new StopCost(index, cost, minCosts[index].time);
                     minCosts[index].isMin = true;
                 }
             }
         }
         static void Main(string[] args)
         {
-            Int32 start = Int32.Parse(Console.ReadLine());
-            Int32 finish = Int32.Parse(Console.ReadLine());
-            var temp = Console.ReadLine().Split(':');
-            Int32 startTime = Int32.Parse(temp[0])*60 + Int32.Parse(temp[1]);
             String path = Path.Combine(Directory.GetCurrentDirectory(), "task.txt");
             ReadData(path);
 
@@ -204,8 +219,8 @@ namespace BusSchedule
             foreach (var a in minTimes[finish - 1].route) {
                 Console.WriteLine(a.ToString());
             }
-            Console.WriteLine("Время прибытия - {0}:{1}", 
-                minTimes[finish - 1].currentMin / 60, minTimes[finish - 1].currentMin % 60 == 0 ? "00" : (minTimes[finish - 1].currentMin % 60).ToString());
+            Console.WriteLine("Время прибытия - {0}:{1:D2}", 
+                minTimes[finish - 1].currentMin / 60, minTimes[finish - 1].currentMin % 60);
             
             foreach (var a in minCosts[finish - 1].route)
             {
